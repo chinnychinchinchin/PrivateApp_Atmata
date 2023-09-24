@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 class SidePanel extends StatelessWidget {
   final List<Map<String, dynamic>> statistics = [
     {
-      'title': 'Battery Level',
+      'title': 'Battery',
       'value': '70%',
       'isBattery': true,
       'batteryLevel': 0.7,
