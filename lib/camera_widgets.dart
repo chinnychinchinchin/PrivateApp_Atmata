@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-
+import 'real_time_stats.dart';
+import 'sidepanel.dart';
+import 'main.dart';
 
 class CameraFeedWithFloatingButtons extends StatefulWidget {
   @override
@@ -10,31 +12,122 @@ class CameraFeedWithFloatingButtons extends StatefulWidget {
 
 class _CameraFeedWithFloatingButtonsState
     extends State<CameraFeedWithFloatingButtons> {
+  bool _showButtons = false;
+  bool _showStats = false;
+  bool _showSidePanel = false;
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        CameraFeed(),
+        GestureDetector(
+          onVerticalDragUpdate: (details) {
+            if (details.delta.dy > 0) {
+              // Swiping down
+              setState(() {
+                _showButtons = false;
+              });
+            } else if (details.delta.dy < 0) {
+              // Swiping up
+              setState(() {
+                _showButtons = true;
+              });
+            }
+          },
+          child: CameraFeed(),
+        ),
+        if (_showButtons)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _floatingButton('2x', () {}, context),
+                _floatingButton('3x', () {}, context),
+                _floatingButton('4x', () {}, context),
+                _floatingButton('Pause', () {
+                  _showNotification(context, "Movement Paused");
+                }, context),
+                _floatingButton('Play', () {
+                  _showNotification(context, "Movement Resumed");
+                }, context),
+                _floatingButton('Done with Shot', () {
+                  _showNotification(context, "Trajectory Recorded");
+                }, context),
+              ],
+            ),
+          ),
+        if (_showStats)
+          Positioned.fill(
+            child: Stack(
+              children: [
+                RealTimeStats(),
+                Positioned(
+                  top: 16,
+                  right: 16,
+                  child: IconButton(
+                    icon: Icon(Icons.close, color: Colors.white),
+                    onPressed: () {
+                      setState(() {
+                        _showStats = false;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        if (_showSidePanel)
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            child: SidePanel(
+              onClose: () {
+                setState(() {
+                  _showSidePanel = false;
+                });
+              },
+            ),
+          ),
+        if (!_showSidePanel && !_showStats)
+          Positioned(
+            top: 16,
+            left: 16,
+            child: IconButton(
+              icon: Icon(Icons.settings, color: Colors.white),
+              onPressed: () {
+                setState(() {
+                  _showSidePanel = true;
+                });
+              },
+            ),
+          ),
+        if (!_showStats && !_showSidePanel)
+          Positioned(
+            top: 16,
+            right: 16,
+            child: IconButton(
+              icon: Icon(Icons.bar_chart, color: Colors.white),
+              onPressed: () {
+                setState(() {
+                  _showStats = true;
+                });
+              },
+            ),
+          ),
         Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              _floatingButton('2x', () {}, context),
-              _floatingButton('3x', () {}, context),
-              _floatingButton('4x', () {}, context),
-              _floatingButton('Pause', () {
-                _showNotification(context, "Movement Paused");
-              }, context),
-              _floatingButton('Play', () {
-                _showNotification(context, "Movement Resumed");
-              }, context),
-              _floatingButton('Done with Shot', () {
-                _showNotification(context, "Trajectory Recorded");
-              }, context),
-            ],
+          bottom: 16,
+          right: 16,
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => WelcomeScreen(),
+              ));
+            },
+            child: Icon(Icons.help),
           ),
         ),
       ],
@@ -80,7 +173,7 @@ class CameraFeed extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: NetworkImage('https://source.unsplash.com/random'),
+          image: NetworkImage('https://picsum.photos/800/600?random'),
           fit: BoxFit.cover,
         ),
       ),

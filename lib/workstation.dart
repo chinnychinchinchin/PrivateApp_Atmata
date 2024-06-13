@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'camera_widgets.dart';
-import 'sidepanel.dart';
 import 'app_drawer.dart';
 
+class WorkstationPage extends StatefulWidget {
+  @override
+  _WorkstationPageState createState() => _WorkstationPageState();
+}
 
-class WorkstationPage extends StatelessWidget {
+class _WorkstationPageState extends State<WorkstationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,22 +23,7 @@ class WorkstationPage extends StatelessWidget {
       ),
       drawer: AppDrawer(),
       body: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: SingleChildScrollView(child: SidePanel()),
-                ),
-                Expanded(
-                  flex: 4,
-                  child: CameraFeedWithFloatingButtons(),
-                ),
-              ],
-            ),
-          ],
-        ),
+        child: CameraFeedWithFloatingButtons(),
       ),
     );
   }

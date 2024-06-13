@@ -1,37 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'trajectory_pool_page.dart';
+import 'joystick_instructions_page.dart';
+import 'virtual_joystick_instructions_page.dart';
+import 'preprogrammed_page.dart';
 
 
 class SidePanel extends StatelessWidget {
-  final List<Map<String, dynamic>> statistics = [
-    {
-      'title': 'Battery',
-      'value': '70%',
-      'isBattery': true,
-      'batteryLevel': 0.7,
-    },
-    {
-      'title': 'Connection Status',
-      'value': 'Connected',
-      'isBattery': false,
-    },
-    {
-      'title': 'Position',
-      'value': '(x: 0, y: 0, z: 0)',
-      'isBattery': false,
-    },
-  ];
+  final VoidCallback onClose;
+
+  SidePanel({required this.onClose});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      width: 250,
+      color: Colors.grey[850],
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Control Modes',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+              IconButton(
+                icon: Icon(Icons.close, color: Colors.white),
+                onPressed: onClose,
+              ),
+            ],
+          ),
           CupertinoButton.filled(
             onPressed: () {
-              _showMovementOptions(context);
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => PreprogrammedPage(),
+                ),
+              );
             },
             child: Row(
               children: [
@@ -45,7 +53,7 @@ class SidePanel extends StatelessWidget {
           SizedBox(height: 10),
           CupertinoButton.filled(
             onPressed: () {
-              _showNotification(context, "Operate Using Joystick");
+              _showManualControlOptions(context);
             },
             child: Row(
               children: [
@@ -59,7 +67,7 @@ class SidePanel extends StatelessWidget {
           SizedBox(height: 10),
           CupertinoButton.filled(
             onPressed: () {
-              _showNotification(context, "There are no movements in the camera pool.");
+              _showRepeatMotionNotification(context);
             },
             child: Row(
               children: [
@@ -70,84 +78,69 @@ class SidePanel extends StatelessWidget {
             ),
             padding: EdgeInsets.all(16),
           ),
-          SizedBox(height: 20),
-          Text(
-            'Real Time Robot Statistics:',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 10),
-          ListView.builder(
-            shrinkWrap: true,
-            itemCount: statistics.length,
-            itemBuilder: (context, index) {
-              var stat = statistics[index];
-              return Card(
-                margin: EdgeInsets.symmetric(vertical: 8),
-                child: ListTile(
-                  title: Text(stat['title']),
-                  subtitle: stat['isBattery']
-                      ? LinearProgressIndicator(
-                    value: stat['batteryLevel'],
-                    semanticsLabel: 'Battery Level',
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-                  )
-                      : Text(stat['value']),
-                ),
-              );
-            },
-          ),
         ],
       ),
     );
   }
 
-  void _showMovementOptions(BuildContext context) {
-
-    showCupertinoModalPopup(
+  void _showManualControlOptions(BuildContext context) {
+    showCupertinoDialog(
       context: context,
       builder: (BuildContext context) {
-        return CupertinoActionSheet(
-          title: Text('Select a Movement/Trajectory'),
+        return CupertinoAlertDialog(
+          title: Text('Select One'),
           actions: <Widget>[
-            _actionSheetOption(context, 'Dolly'),
-            _actionSheetOption(context, 'Pan'),
-            _actionSheetOption(context, 'Pull In'),
-            _actionSheetOption(context, 'Pull Out'),
-            _actionSheetOption(context, 'Circle'),
+            CupertinoDialogAction(
+              child: Text('Use Virtual Joystick'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => VirtualJoystickInstructionsPage(),
+                  ),
+                );
+              },
+            ),
+            CupertinoDialogAction(
+              child: Text('Connect to your Joystick'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => JoystickInstructionsPage(),
+                  ),
+                );
+              },
+            ),
           ],
-          cancelButton: CupertinoActionSheetAction(
-            child: Text('Cancel'),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
         );
       },
     );
   }
 
-  CupertinoActionSheetAction _actionSheetOption(BuildContext context, String option) {
-    return CupertinoActionSheetAction(
-      child: Text(option),
-      onPressed: () {
-        Navigator.pop(context);
-        _showNotification(context, "$option Movement Executed");
-      },
-    );
-  }
-
-  void _showNotification(BuildContext context, String message) {
+  void _showRepeatMotionNotification(BuildContext context) {
     showCupertinoDialog(
       context: context,
       builder: (BuildContext context) {
         return CupertinoAlertDialog(
           title: Text('Notification'),
-          content: Text(message),
+          content: Text('There are no movements in the camera pool. Do you wish to continue?'),
           actions: <Widget>[
             CupertinoDialogAction(
-              child: Text('OK'),
+              child: Text('No'),
               onPressed: () {
                 Navigator.of(context).pop();
+              },
+            ),
+            CupertinoDialogAction(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => TrajectoryPoolPage(),
+                  ),
+                );
               },
             ),
           ],
@@ -156,3 +149,4 @@ class SidePanel extends StatelessWidget {
     );
   }
 }
+
